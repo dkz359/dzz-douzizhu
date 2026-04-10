@@ -1,10 +1,23 @@
 import React from 'react'
+import { GameProvider, useGame } from './context/GameContext'
+import { StartScreen } from './components/StartScreen'
+import { GameTable } from './components/GameTable'
+
+function GameContent() {
+  const { state, startGame } = useGame()
+
+  if (state.phase === 'idle') {
+    return <StartScreen onStart={startGame} />
+  }
+
+  return <GameTable />
+}
 
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-shiba-dark">柴犬斗地主</h1>
-    </div>
+    <GameProvider>
+      <GameContent />
+    </GameProvider>
   )
 }
 
