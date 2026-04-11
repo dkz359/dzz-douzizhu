@@ -92,7 +92,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const updatedPlayers = [...state.players]
       updatedPlayers[playerIndex] = { ...player, hand: newHand }
 
-      const newRoundPlayedCards = { ...state.roundPlayedCards }
+      // 如果 currentPlayer 等于 lastPlayedPlayer，说明之前的玩家已经出过，现在是新一轮，清除上轮状态
+      const isNewRound = state.currentPlayer === state.lastPlayedPlayer
+      const newRoundPlayedCards = isNewRound
+        ? { player: null as Card[] | null, ai1: null as Card[] | null, ai2: null as Card[] | null }
+        : { ...state.roundPlayedCards }
       newRoundPlayedCards[position] = cards
 
       return {
