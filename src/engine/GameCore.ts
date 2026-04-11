@@ -149,6 +149,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           grabDecisions: newGrabDecisions,
           lastGrabber: state.currentPlayer,
           currentPlayer: nextPlayer,
+          regrabAfterFirst: true,
         }
       }
 
