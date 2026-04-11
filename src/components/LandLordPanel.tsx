@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { PlayerPosition } from '../types'
 
@@ -10,6 +10,18 @@ interface LandLordPanelProps {
 }
 
 export function LandLordPanel({ currentPlayer, grabDecision, onGrabLord, onPassGrab }: LandLordPanelProps) {
+  // 如果玩家已经决定过，自动继续（不抢则pass，不显示面板）
+  useEffect(() => {
+    if (currentPlayer === 'player' && grabDecision !== 'none') {
+      // 已经抢过了，直接确认；已经过过了，自动pass继续
+      if (grabDecision === 'grabbed') {
+        onGrabLord('player')
+      } else {
+        onPassGrab('player')
+      }
+    }
+  }, [currentPlayer, grabDecision, onGrabLord, onPassGrab])
+
   // 如果玩家已经决定过（抢或过），不显示操作面板
   if (grabDecision !== 'none') {
     return null
