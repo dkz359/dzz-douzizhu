@@ -150,21 +150,21 @@ export function GameTable() {
 
       {/* AI1 出牌区 - 左侧 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai1' && (
+        {state.lastPlayedCards && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai1" />
         )}
       </div>
 
       {/* AI2 出牌区 - 右侧 */}
       <div className="absolute top-1/3 right-1/4 translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai2' && (
+        {state.lastPlayedCards && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai2" />
         )}
       </div>
 
       {/* 玩家出牌区 - 中央下方 */}
       <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'player' && (
+        {state.lastPlayedCards && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="player" />
         )}
       </div>
