@@ -2,6 +2,9 @@ import { Card, CardType, GameState, GameAction, Player, PlayerPosition } from '.
 import { createDeck, shuffleDeck } from './utils'
 import { identifyCardType, compareCardTypes } from './CardTypes'
 
+// 三轮抢地主 (0, 1, 2 = 共3轮)
+const MAX_GRAB_ROUNDS = 2
+
 // 初始玩家状态
 function createInitialPlayers(): Player[] {
   return [
@@ -23,7 +26,38 @@ export function createInitialState(): GameState {
     lastPlayedCards: null,
     lastPlayedPlayer: null,
     winner: null,
-    settings: { difficulty: 'normal' }
+    settings: { difficulty: 'normal' },
+    lordCandidate: null,
+    grabRound: 0,
+  }
+}
+
+// 处理抢地主轮次结束或继续
+function handleRoundEndOrAdvance(
+  state: GameState,
+  positions: PlayerPosition[],
+  setCandidate: boolean
+): GameState {
+  const nextPlayer = getNextPlayer(state.currentPlayer, positions)
+  const isRoundEnd = nextPlayer === positions[0]
+
+  if (isRoundEnd) {
+    if (state.grabRound >= MAX_GRAB_ROUNDS) {
+      const finalLord = state.lordCandidate || positions[0]
+      return confirmLord(state, finalLord)
+    }
+    return {
+      ...state,
+      ...(setCandidate ? { lordCandidate: state.currentPlayer } : {}),
+      currentPlayer: nextPlayer,
+      grabRound: state.grabRound + 1,
+    }
+  }
+
+  return {
+    ...state,
+    ...(setCandidate ? { lordCandidate: state.currentPlayer } : {}),
+    currentPlayer: nextPlayer,
   }
 }
 
@@ -55,30 +89,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         lastPlayedCards: null,
         lastPlayedPlayer: null,
         winner: null,
+        lordCandidate: null,
+        grabRound: 0,
       }
     }
 
     case 'DEAL_CARDS': {
       return { ...state, phase: 'grabbing_lord' }
-    }
-
-    case 'SET_LORD': {
-      const lordPos = action.position
-      const updatedPlayers = state.players.map(p => ({
-        ...p,
-        isLord: p.position === lordPos,
-        hand: p.position === lordPos
-          ? [...p.hand, ...state.bottomCards]
-          : p.hand
-      }))
-
-      return {
-        ...state,
-        phase: 'playing',
-        players: updatedPlayers,
-        lordPosition: lordPos,
-        currentPlayer: lordPos,
-      }
     }
 
     case 'PLAY_CARDS': {
@@ -124,6 +141,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
     }
 
+    case 'GRAB_LORD': {
+      if (action.position !== state.currentPlayer) return state
+      const positions = state.players.map(p => p.position)
+      return handleRoundEndOrAdvance(state, positions, true)
+    }
+
+    case 'PASS_GRAB': {
+      if (action.position !== state.currentPlayer) return state
+      const positions = state.players.map(p => p.position)
+      return handleRoundEndOrAdvance(state, positions, false)
+    }
+
     case 'RESET_GAME': {
       return createInitialState()
     }
@@ -137,6 +166,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 function getNextPlayer(current: PlayerPosition, positions: PlayerPosition[]): PlayerPosition {
   const index = positions.indexOf(current)
   return positions[(index + 1) % positions.length]
+}
+
+// 确认地主
+function confirmLord(state: GameState, lordPos: PlayerPosition): GameState {
+  const updatedPlayers = state.players.map(p => ({
+    ...p,
+    isLord: p.position === lordPos,
+    hand: p.position === lordPos ? [...p.hand, ...state.bottomCards] : p.hand
+  }))
+  return {
+    ...state,
+    phase: 'playing',
+    players: updatedPlayers,
+    lordPosition: lordPos,
+    currentPlayer: lordPos,
+  }
 }
 
 // 检查是否可以出牌

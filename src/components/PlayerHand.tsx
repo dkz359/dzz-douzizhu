@@ -8,16 +8,18 @@ interface PlayerHandProps {
   cards: CardType[]
   isCurrentPlayer: boolean
   onPlayCards: (cards: CardType[]) => void
-  lastPlayedCards: CardType | null
   isFirstPlay: boolean
+  canPass?: boolean
+  onPass?: () => void
 }
 
 export function PlayerHand({
   cards,
   isCurrentPlayer,
   onPlayCards,
-  lastPlayedCards,
-  isFirstPlay
+  isFirstPlay,
+  canPass,
+  onPass
 }: PlayerHandProps) {
   const [selectedCards, setSelectedCards] = useState<CardType[]>([])
 
@@ -47,18 +49,28 @@ export function PlayerHand({
   return (
     <div className="flex flex-col items-center">
       {/* 出牌按钮 - 在手牌上方 */}
-      {isCurrentPlayer && selectedCards.length > 0 && (
+      {isCurrentPlayer && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4"
+          className="mb-4 flex gap-4 justify-center"
         >
-          <button
-            onClick={handlePlay}
-            className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
-          >
-            出牌 ({selectedCards.length}张)
-          </button>
+          {canPass && (
+            <button
+              onClick={onPass}
+              className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full shadow-lg"
+            >
+              不出
+            </button>
+          )}
+          {selectedCards.length > 0 && (
+            <button
+              onClick={handlePlay}
+              className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
+            >
+              出牌 ({selectedCards.length}张)
+            </button>
+          )}
         </motion.div>
       )}
 

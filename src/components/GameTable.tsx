@@ -7,11 +7,12 @@ import { PlayerHand } from './PlayerHand'
 import { LandLordPanel } from './LandLordPanel'
 import { ActionPanel } from './ActionPanel'
 import { ResultModal } from './ResultModal'
-import { Card, CardBack } from './Card'
+import { Card as CardComponent, CardBack } from './Card'
+import { Card } from '../types'
 import { canPlayCards } from '../engine/GameCore'
 
 export function GameTable() {
-  const { state, startGame, grabLord, playCards, pass, resetGame, dispatch } = useGame()
+  const { state, startGame, grabLord, passGrab, playCards, pass, resetGame, dispatch } = useGame()
 
   // Game phase transitions and AI logic
   useEffect(() => {
@@ -40,6 +41,8 @@ export function GameTable() {
         const shouldGrab = aiController.decideGrabLord(state.settings.difficulty, aiPlayer.hand)
         if (shouldGrab) {
           grabLord(currentPlayer)
+        } else {
+          passGrab(currentPlayer)
         }
       } else if (state.phase === 'playing') {
         // AI 出牌决策
@@ -60,7 +63,7 @@ export function GameTable() {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [state.phase, state.currentPlayer, state, grabLord, playCards, pass])
+  }, [state.phase, state.currentPlayer, state, grabLord, passGrab, playCards, pass])
 
   const handlePlayCards = useCallback((cards: typeof state.players[0]['hand']) => {
     playCards('player', cards)
@@ -70,9 +73,24 @@ export function GameTable() {
     pass('player')
   }, [pass])
 
+  // Helper component to render played cards area
+  const PlayedCardsArea = ({ cards, position }: { cards: Card[], position: string }) => (
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className="flex gap-1 bg-black/30 rounded-xl p-2"
+    >
+      {cards.map(card => (
+        <CardComponent key={card.id} card={card} isSmall={position !== 'player'} />
+      ))}
+    </motion.div>
+  )
+
   const player = state.players.find(p => p.position === 'player')!
   const ai1 = state.players.find(p => p.position === 'ai1')!
   const ai2 = state.players.find(p => p.position === 'ai2')!
+
+  const playerCanPass = state.lastPlayedPlayer !== null && state.lastPlayedPlayer !== 'player'
 
   const isLordWin = state.winner === state.lordPosition
 
@@ -116,18 +134,24 @@ export function GameTable() {
         )}
       </div>
 
-      {/* 出牌区 */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-8">
-        {state.lastPlayedCards && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="flex gap-1 bg-black/30 rounded-xl p-2"
-          >
-            {state.lastPlayedCards.cards.map(card => (
-              <Card key={card.id} card={card} isSmall />
-            ))}
-          </motion.div>
+      {/* AI1 出牌区 - 左侧 */}
+      <div className="absolute top-1/3 left-1/4 -translate-x-1/2">
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai1' && (
+          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai1" />
+        )}
+      </div>
+
+      {/* AI2 出牌区 - 右侧 */}
+      <div className="absolute top-1/3 right-1/4 translate-x-1/2">
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai2' && (
+          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai2" />
+        )}
+      </div>
+
+      {/* 玩家出牌区 - 中央下方 */}
+      <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'player' && (
+          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="player" />
         )}
       </div>
 
@@ -137,8 +161,9 @@ export function GameTable() {
           cards={player.hand}
           isCurrentPlayer={state.currentPlayer === 'player'}
           onPlayCards={handlePlayCards}
-          lastPlayedCards={null}
           isFirstPlay={state.lastPlayedPlayer === null}
+          canPass={playerCanPass}
+          onPass={handlePass}
         />
       </div>
 
@@ -148,18 +173,17 @@ export function GameTable() {
           <LandLordPanel
             currentPlayer={state.currentPlayer}
             onGrabLord={grabLord}
+            onPassGrab={passGrab}
           />
         )}
       </AnimatePresence>
 
       {/* 出牌控制面板 */}
       <AnimatePresence>
-        {state.phase === 'playing' && (
+        {state.phase === 'playing' && state.currentPlayer !== 'player' && (
           <div className="absolute bottom-32 left-0 right-0 flex justify-center">
             <ActionPanel
               currentPlayer={state.currentPlayer}
-              onPass={handlePass}
-              canPass={state.lastPlayedPlayer !== null && state.lastPlayedPlayer !== 'player'}
             />
           </div>
         )}

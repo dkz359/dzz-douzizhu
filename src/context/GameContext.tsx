@@ -7,6 +7,7 @@ interface GameContextType {
   dispatch: React.Dispatch<GameAction>
   startGame: (settings: { difficulty: 'easy' | 'normal' | 'hard' }) => void
   grabLord: (position: PlayerPosition) => void
+  passGrab: (position: PlayerPosition) => void
   playCards: (position: PlayerPosition, cards: Card[]) => void
   pass: (position: PlayerPosition) => void
   resetGame: () => void
@@ -22,7 +23,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const grabLord = (position: PlayerPosition) => {
-    dispatch({ type: 'SET_LORD', position })
+    dispatch({ type: 'GRAB_LORD', position })
+  }
+
+  const passGrab = (position: PlayerPosition) => {
+    dispatch({ type: 'PASS_GRAB', position })
   }
 
   const playCards = (position: PlayerPosition, cards: Card[]) => {
@@ -38,7 +43,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <GameContext.Provider value={{ state, dispatch, startGame, grabLord, playCards, pass, resetGame }}>
+    <GameContext.Provider value={{ state, dispatch, startGame, grabLord, passGrab, playCards, pass, resetGame }}>
       {children}
     </GameContext.Provider>
   )

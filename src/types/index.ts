@@ -69,16 +69,19 @@ export interface GameState {
   lastPlayedPlayer: PlayerPosition | null // 上家出牌玩家
   winner: PlayerPosition | null
   settings: GameSettings
+  lordCandidate: PlayerPosition | null  // 候选地主
+  grabRound: number                      // 当前抢地主轮次 (0-2)
 }
 
 // 游戏动作
 export type GameAction =
   | { type: 'START_GAME'; settings: GameSettings }
   | { type: 'DEAL_CARDS' }
-  | { type: 'SET_LORD'; position: PlayerPosition }
   | { type: 'PLAY_CARDS'; position: PlayerPosition; cards: Card[] }
   | { type: 'PASS'; position: PlayerPosition }
   | { type: 'RESET_GAME' }
+  | { type: 'GRAB_LORD'; position: PlayerPosition }
+  | { type: 'PASS_GRAB'; position: PlayerPosition }
 
 // AI决策接口
 export interface IAIStrategy {

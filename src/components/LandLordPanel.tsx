@@ -5,9 +5,10 @@ import { PlayerPosition } from '../types'
 interface LandLordPanelProps {
   currentPlayer: PlayerPosition
   onGrabLord: (position: PlayerPosition) => void
+  onPassGrab: (position: PlayerPosition) => void
 }
 
-export function LandLordPanel({ currentPlayer, onGrabLord }: LandLordPanelProps) {
+export function LandLordPanel({ currentPlayer, onGrabLord, onPassGrab }: LandLordPanelProps) {
   if (currentPlayer === 'player') {
     return (
       <motion.div
@@ -29,6 +30,7 @@ export function LandLordPanel({ currentPlayer, onGrabLord }: LandLordPanelProps)
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => onPassGrab('player')}
               className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full shadow-lg"
             >
               不抢

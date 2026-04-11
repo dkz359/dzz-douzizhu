@@ -4,11 +4,10 @@ import { PlayerPosition } from '../types'
 
 interface ActionPanelProps {
   currentPlayer: PlayerPosition
-  onPass: (position: PlayerPosition) => void
-  canPass: boolean
 }
 
-export function ActionPanel({ currentPlayer, onPass, canPass }: ActionPanelProps) {
+export function ActionPanel({ currentPlayer }: ActionPanelProps) {
+  // Only show waiting during AI turns
   if (currentPlayer !== 'player') {
     return (
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -23,22 +22,6 @@ export function ActionPanel({ currentPlayer, onPass, canPass }: ActionPanelProps
     )
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex justify-center gap-4"
-    >
-      {canPass && (
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onPass('player')}
-          className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full shadow-lg"
-        >
-          不出
-        </motion.button>
-      )}
-    </motion.div>
-  )
+  // Player turn - let PlayerHand handle buttons
+  return null
 }
