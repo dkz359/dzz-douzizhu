@@ -46,6 +46,22 @@ export function PlayerHand({
 
   return (
     <div className="flex flex-col items-center">
+      {/* 出牌按钮 - 在手牌上方 */}
+      {isCurrentPlayer && selectedCards.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4"
+        >
+          <button
+            onClick={handlePlay}
+            className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
+          >
+            出牌 ({selectedCards.length}张)
+          </button>
+        </motion.div>
+      )}
+
       {/* 手牌 */}
       <div className="flex justify-center gap-1 px-4 py-2 bg-green-800/50 rounded-t-xl">
         {sortedCards.map((card, index) => (
@@ -66,22 +82,6 @@ export function PlayerHand({
           </motion.div>
         ))}
       </div>
-
-      {/* 出牌按钮 */}
-      {isCurrentPlayer && selectedCards.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4"
-        >
-          <button
-            onClick={handlePlay}
-            className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
-          >
-            出牌 ({selectedCards.length}张)
-          </button>
-        </motion.div>
-      )}
     </div>
   )
 }

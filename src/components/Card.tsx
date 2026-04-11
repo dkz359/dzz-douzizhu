@@ -23,11 +23,9 @@ export function Card({ card, isSelected, isPlayable, onClick, isSmall }: CardPro
       whileHover={isPlayable ? { y: -10 } : {}}
       whileTap={isPlayable ? { scale: 0.95 } : {}}
       onClick={isPlayable ? onClick : undefined}
-      className={`
-        relative cursor-pointer select-none
-        ${isPlayable ? 'cursor-pointer' : 'cursor-default'}
-        ${isSelected ? '-translate-y-4' : ''}
-      `}
+      animate={{ y: isSelected ? -20 : 0 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      className="relative cursor-pointer select-none"
       style={{ scale }}
     >
       {/* 卡牌背景 */}

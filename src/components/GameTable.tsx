@@ -7,15 +7,25 @@ import { PlayerHand } from './PlayerHand'
 import { LandLordPanel } from './LandLordPanel'
 import { ActionPanel } from './ActionPanel'
 import { ResultModal } from './ResultModal'
-import { CardBack } from './Card'
+import { Card, CardBack } from './Card'
 import { canPlayCards } from '../engine/GameCore'
 
 export function GameTable() {
-  const { state, startGame, grabLord, playCards, pass, resetGame } = useGame()
+  const { state, startGame, grabLord, playCards, pass, resetGame, dispatch } = useGame()
 
-  // AI 逻辑
+  // Game phase transitions and AI logic
   useEffect(() => {
     if (state.phase === 'idle' || state.phase === 'game_over') return
+
+    // Deal animation completed - transition to lord grabbing phase
+    if (state.phase === 'dealing') {
+      const DEAL_DURATION = 16 * 50 + 300
+      // 16 cards before last × 50ms delay + 300ms animation = ~1.1s
+      const timer = setTimeout(() => {
+        dispatch({ type: 'DEAL_CARDS' })
+      }, DEAL_DURATION)
+      return () => clearTimeout(timer)
+    }
 
     const currentPlayer = state.currentPlayer
     if (currentPlayer === 'player') return
@@ -115,7 +125,7 @@ export function GameTable() {
             className="flex gap-1 bg-black/30 rounded-xl p-2"
           >
             {state.lastPlayedCards.cards.map(card => (
-              <div key={card.id} className="w-10 h-14 bg-white rounded shadow" />
+              <Card key={card.id} card={card} isSmall />
             ))}
           </motion.div>
         )}
@@ -127,7 +137,7 @@ export function GameTable() {
           cards={player.hand}
           isCurrentPlayer={state.currentPlayer === 'player'}
           onPlayCards={handlePlayCards}
-          lastPlayedCards={state.lastPlayedCards}
+          lastPlayedCards={null}
           isFirstPlay={state.lastPlayedPlayer === null}
         />
       </div>
