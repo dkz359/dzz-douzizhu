@@ -169,6 +169,31 @@ export function GameTable() {
         )}
       </div>
 
+      {/* 玩家头像和信息 - 左下角 */}
+      <div className="absolute bottom-8 left-8 flex flex-col items-center gap-2">
+        <div className={`
+          w-16 h-16 rounded-full bg-orange-200 flex items-center justify-center text-3xl
+          border-4 ${player.isLord ? 'border-yellow-400' : 'border-orange-300'}
+          ${state.currentPlayer === 'player' ? 'ring-4 ring-yellow-400 ring-opacity-70 rounded-xl animate-pulse' : ''}
+        `}>
+          🧑
+        </div>
+        <div className="text-center relative">
+          <div className="text-white font-bold text-sm drop-shadow-lg">
+            {player.name}
+          </div>
+          {player.isLord ? (
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-lg">
+              地主
+            </div>
+          ) : state.phase === 'playing' ? (
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+              农民
+            </div>
+          ) : null}
+        </div>
+      </div>
+
       {/* 玩家手牌 */}
       <div className="absolute bottom-0 left-0 right-0">
         <PlayerHand
