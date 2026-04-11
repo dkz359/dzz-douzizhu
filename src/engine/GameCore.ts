@@ -135,6 +135,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'GRAB_LORD': {
       if (action.position !== state.currentPlayer) return state
 
+      // 如果已经选择过"不抢"，不能再抢
+      if (state.grabDecisions[action.position] === 'passed') return state
+
       const positions = state.players.map(p => p.position)
       const nextPlayer = getNextPlayer(state.currentPlayer, positions)
       const newGrabDecisions = {
