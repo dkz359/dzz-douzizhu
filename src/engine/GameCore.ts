@@ -137,9 +137,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         [action.position]: 'grabbed' as const
       }
 
-      // 如果回到 firstGrabber
+      // 关键修复：如果 firstGrabber 在第二轮再次抢了，直接确认他为地主
+      if (state.currentPlayer === state.firstGrabber && state.regrabAfterFirst) {
+        return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+      }
+
+      // 如果回到 firstGrabber（第一轮的情况）
       if (nextPlayer === state.firstGrabber) {
-        // 如果是 firstGrabber 自己抢了（首次或再次）→ 确认他为地主
+        // 如果是 firstGrabber 自己抢了（首次）→ 确认他为地主
         if (state.currentPlayer === state.firstGrabber) {
           return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
         }
