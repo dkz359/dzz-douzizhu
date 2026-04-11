@@ -107,14 +107,13 @@ export function GameTable() {
     }
     if (state.phase === 'playing') {
       const playedCards = state.roundPlayedCards[pos]
+      // 空数组表示选择了"不出"
+      if (playedCards && playedCards.length === 0) {
+        return { type: 'text', text: '不出' }
+      }
+      // 有牌时显示牌
       if (playedCards && playedCards.length > 0) {
         return { type: 'cards', cards: playedCards }
-      }
-      // Only show "不出" if:
-      // 1. It's this player's turn (currentPlayer === pos)
-      // 2. Someone else has already played cards this round (lastPlayedCards !== null)
-      if (state.currentPlayer === pos && state.lastPlayedCards !== null) {
-        return { type: 'text', text: '不出' }
       }
       return null
     }

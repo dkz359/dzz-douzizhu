@@ -121,9 +121,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      // 清除当前玩家出的牌（选择不出）
+      // 设置当前玩家选择不出（用空数组表示，不清除为 null）
       const newRoundPlayedCards = { ...state.roundPlayedCards }
-      newRoundPlayedCards[state.currentPlayer] = null
+      newRoundPlayedCards[state.currentPlayer] = []
 
       return {
         ...state,
