@@ -73,6 +73,7 @@ export class NormalAI implements IAIStrategy {
   private canBeat(card: Card, lastCards: CardType | null, isFirstPlay: boolean): boolean {
     if (isFirstPlay || lastCards === null) return true
     if (lastCards.type === 'rocket') return false
+    if (lastCards.type !== 'single') return false
     return card.rank > lastCards.rank
   }
 

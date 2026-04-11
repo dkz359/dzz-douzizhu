@@ -4,7 +4,7 @@ import { Card, Suit, PlayerPosition } from '../types'
 export function createDeck(): Card[] {
   const deck: Card[] = []
   const suits: Suit[] = ['spade', 'heart', 'club', 'diamond']
-  const ranks = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] // 3到A
+  const ranks = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] // 3到2
 
   // 四个花色的牌
   for (const suit of suits) {

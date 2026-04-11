@@ -103,6 +103,7 @@ export class HardAI implements IAIStrategy {
     if (isFirstPlay || lastCards === null) return true
     if (lastCards.type === 'rocket') return false
     if (lastCards.type === 'bomb') return card.rank > lastCards.rank
+    if (lastCards.type !== 'single') return false
     return card.rank > lastCards.rank
   }
 

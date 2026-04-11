@@ -28,10 +28,11 @@ export class EasyAI implements IAIStrategy {
     // 随机过牌
     if (Math.random() < 0.3) return 'pass' as unknown as Card[]
 
-    // 随机出一张能打过的牌
+    // 随机出一张能打过的牌（只有上家出的是单张才能用单张压过）
     const playable = hand.filter(c => {
       const cardType = identifyCardType([c])
       if (!cardType) return false
+      if (lastCards.type !== 'single') return false
       return cardType.rank > lastCards.rank
     })
 
