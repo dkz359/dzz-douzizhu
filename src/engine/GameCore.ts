@@ -92,11 +92,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const updatedPlayers = [...state.players]
       updatedPlayers[playerIndex] = { ...player, hand: newHand }
 
-      // 如果新一轮开始（currentPlayer 又回到了 lastPlayedPlayer），清除所有状态
-      const isNewRound = state.currentPlayer === state.lastPlayedPlayer
-      const newRoundPlayedCards = isNewRound
-        ? { player: null as Card[] | null, ai1: null as Card[] | null, ai2: null as Card[] | null }
-        : { ...state.roundPlayedCards }
+      const nextPlayer = getNextPlayer(position, state.players.map(p => p.position))
+
+      // 轮到下一个玩家出牌时，先清空他的出牌区域（因为还没选择出不出）
+      const newRoundPlayedCards = { ...state.roundPlayedCards }
+      newRoundPlayedCards[nextPlayer] = null
       newRoundPlayedCards[position] = cards
 
       return {
@@ -105,7 +105,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         roundPlayedCards: newRoundPlayedCards,
         lastPlayedCards: cardType,
         lastPlayedPlayer: position,
-        currentPlayer: getNextPlayer(position, state.players.map(p => p.position)),
+        currentPlayer: nextPlayer,
         winner: isWin ? position : null,
         phase: isWin ? 'game_over' : state.phase,
       }
@@ -125,9 +125,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      // 设置当前玩家选择不出（用空数组表示，不清除为 null）
+      // 设置当前玩家选择不出（用空数组表示）
       const newRoundPlayedCards = { ...state.roundPlayedCards }
       newRoundPlayedCards[state.currentPlayer] = []
+      // 清空下一个玩家的出牌区域（因为还没选择出不出）
+      newRoundPlayedCards[nextPlayer] = null
 
       return {
         ...state,
