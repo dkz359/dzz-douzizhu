@@ -4,11 +4,17 @@ import { PlayerPosition } from '../types'
 
 interface LandLordPanelProps {
   currentPlayer: PlayerPosition
+  grabDecision: 'none' | 'grabbed' | 'passed'
   onGrabLord: (position: PlayerPosition) => void
   onPassGrab: (position: PlayerPosition) => void
 }
 
-export function LandLordPanel({ currentPlayer, onGrabLord, onPassGrab }: LandLordPanelProps) {
+export function LandLordPanel({ currentPlayer, grabDecision, onGrabLord, onPassGrab }: LandLordPanelProps) {
+  // 如果玩家已经决定过（抢或过），不显示操作面板
+  if (grabDecision !== 'none') {
+    return null
+  }
+
   if (currentPlayer === 'player') {
     return (
       <motion.div

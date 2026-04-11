@@ -257,6 +257,7 @@ export function GameTable() {
         {state.phase === 'grabbing_lord' && (
           <LandLordPanel
             currentPlayer={state.currentPlayer}
+            grabDecision={state.grabDecisions.player}
             onGrabLord={grabLord}
             onPassGrab={passGrab}
           />
