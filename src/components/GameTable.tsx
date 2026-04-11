@@ -152,22 +152,22 @@ export function GameTable() {
 
       {/* AI1 出牌区 - 左侧 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai1' && (
-          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai1" />
+        {state.roundPlayedCards?.ai1 && (
+          <PlayedCardsArea cards={state.roundPlayedCards.ai1} position="ai1" />
         )}
       </div>
 
       {/* AI2 出牌区 - 右侧 */}
       <div className="absolute top-1/3 right-1/4 translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai2' && (
-          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai2" />
+        {state.roundPlayedCards?.ai2 && (
+          <PlayedCardsArea cards={state.roundPlayedCards.ai2} position="ai2" />
         )}
       </div>
 
       {/* 玩家出牌区 - 中央下方 */}
       <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
-        {state.lastPlayedCards && state.lastPlayedPlayer === 'player' && (
-          <PlayedCardsArea cards={state.lastPlayedCards.cards} position="player" />
+        {state.roundPlayedCards?.player && (
+          <PlayedCardsArea cards={state.roundPlayedCards.player} position="player" />
         )}
       </div>
 
