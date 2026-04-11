@@ -68,13 +68,13 @@ export function AIPlayer({ player, isCurrentPlayer, isLord, position, grabStatus
         )}
       </div>
 
-      {/* Grab status indicators */}
-      {grabStatus === 'grabbed' && (
+      {/* Grab status indicators - only during grabbing_lord phase */}
+      {gamePhase === 'grabbing_lord' && grabStatus === 'grabbed' && (
         <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs px-1 rounded-full shadow">
           已抢
         </div>
       )}
-      {grabStatus === 'passed' && (
+      {gamePhase === 'grabbing_lord' && grabStatus === 'passed' && (
         <div className="absolute -top-2 -right-2 bg-gray-400 text-white text-xs px-1 rounded-full">
           不抢
         </div>
