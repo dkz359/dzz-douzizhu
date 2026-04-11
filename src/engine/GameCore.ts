@@ -199,9 +199,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       if (isRoundEnd) {
-        if (state.lastGrabber !== null && state.lastGrabber !== state.firstGrabber) {
-          return { ...confirmLord(state, state.lastGrabber), grabDecisions: newGrabDecisions }
+        // 如果 B 或 C 在第一轮抢过，firstGrabber 获得第二次机会
+        if (state.regrabAfterFirst) {
+          return {
+            ...state,
+            grabDecisions: newGrabDecisions,
+            // 不确认地主，等待 firstGrabber 决策
+            // currentPlayer 已经指向 firstGrabber
+          }
         }
+        // 否则（B、C 都过），firstGrabber 自动成为地主
         return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }
       }
 
