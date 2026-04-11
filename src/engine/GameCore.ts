@@ -139,15 +139,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       // 如果回到 firstGrabber
       if (nextPlayer === state.firstGrabber) {
-        // 如果是 firstGrabber 自己抢了且之前没人后抢
-        if (state.currentPlayer === state.firstGrabber && !state.regrabAfterFirst) {
-          // firstGrabber 首次抢后轮转回来，直接成为地主
+        // 如果是 firstGrabber 自己抢了（首次或再次）→ 确认他为地主
+        if (state.currentPlayer === state.firstGrabber) {
           return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
         }
-        // 如果有人后抢了，现在要最终确认
-        if (state.firstGrabber !== null && state.regrabAfterFirst) {
-          // firstGrabber 再次确认抢 → 成为地主
-          return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+        // 如果是其他人抢后轮到 firstGrabber → 只更新状态，不确认，等 firstGrabber 决策
+        return {
+          ...state,
+          grabDecisions: newGrabDecisions,
+          lastGrabber: state.currentPlayer,
+          currentPlayer: nextPlayer,
         }
       }
 
@@ -160,7 +161,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         firstGrabber: isFirstGrab ? state.currentPlayer : state.firstGrabber,
         lastGrabber: state.currentPlayer,
         currentPlayer: nextPlayer,
-        // 如果 firstGrabber 已经抢过且现在又有人抢了，设置标记
         regrabAfterFirst: !isFirstGrab ? true : state.regrabAfterFirst,
       }
     }
