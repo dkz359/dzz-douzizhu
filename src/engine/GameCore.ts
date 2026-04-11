@@ -2,9 +2,6 @@ import { Card, CardType, GameState, GameAction, Player, PlayerPosition } from '.
 import { createDeck, shuffleDeck } from './utils'
 import { identifyCardType, compareCardTypes } from './CardTypes'
 
-// 三轮抢地主 (0, 1, 2 = 共3轮)
-const MAX_GRAB_ROUNDS = 2
-
 // 初始玩家状态
 function createInitialPlayers(): Player[] {
   return [
@@ -27,37 +24,10 @@ export function createInitialState(): GameState {
     lastPlayedPlayer: null,
     winner: null,
     settings: { difficulty: 'normal' },
-    lordCandidate: null,
-    grabRound: 0,
-  }
-}
-
-// 处理抢地主轮次结束或继续
-function handleRoundEndOrAdvance(
-  state: GameState,
-  positions: PlayerPosition[],
-  setCandidate: boolean
-): GameState {
-  const nextPlayer = getNextPlayer(state.currentPlayer, positions)
-  const isRoundEnd = nextPlayer === positions[0]
-
-  if (isRoundEnd) {
-    if (state.grabRound >= MAX_GRAB_ROUNDS) {
-      const finalLord = state.lordCandidate || positions[0]
-      return confirmLord(state, finalLord)
-    }
-    return {
-      ...state,
-      ...(setCandidate ? { lordCandidate: state.currentPlayer } : {}),
-      currentPlayer: nextPlayer,
-      grabRound: state.grabRound + 1,
-    }
-  }
-
-  return {
-    ...state,
-    ...(setCandidate ? { lordCandidate: state.currentPlayer } : {}),
-    currentPlayer: nextPlayer,
+    firstGrabber: null,
+    lastGrabber: null,
+    grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
+    grabPassCount: 0,
   }
 }
 
@@ -73,6 +43,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const ai2Cards = deck.slice(34, 51)
       const bottomCards = deck.slice(51, 54)
 
+      const positions: PlayerPosition[] = ['player', 'ai1', 'ai2']
+      const randomStart = positions[Math.floor(Math.random() * 3)]
+
       return {
         ...state,
         phase: 'dealing',
@@ -85,12 +58,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         deck: [],
         bottomCards,
         lordPosition: null,
-        currentPlayer: 'player',
+        currentPlayer: randomStart,
         lastPlayedCards: null,
         lastPlayedPlayer: null,
         winner: null,
-        lordCandidate: null,
-        grabRound: 0,
+        firstGrabber: null,
+        lastGrabber: null,
+        grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
+        grabPassCount: 0,
       }
     }
 
@@ -143,14 +118,73 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'GRAB_LORD': {
       if (action.position !== state.currentPlayer) return state
+
       const positions = state.players.map(p => p.position)
-      return handleRoundEndOrAdvance(state, positions, true)
+      const nextPlayer = getNextPlayer(state.currentPlayer, positions)
+      const isRoundEnd = nextPlayer === state.firstGrabber
+
+      const newGrabDecisions = {
+        ...state.grabDecisions,
+        [action.position]: 'grabbed' as const
+      }
+
+      if (isRoundEnd && state.firstGrabber !== null) {
+        return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+      }
+
+      return {
+        ...state,
+        grabDecisions: newGrabDecisions,
+        firstGrabber: state.firstGrabber === null ? state.currentPlayer : state.firstGrabber,
+        lastGrabber: state.currentPlayer,
+        currentPlayer: nextPlayer,
+      }
     }
 
     case 'PASS_GRAB': {
       if (action.position !== state.currentPlayer) return state
+
       const positions = state.players.map(p => p.position)
-      return handleRoundEndOrAdvance(state, positions, false)
+      const nextPlayer = getNextPlayer(state.currentPlayer, positions)
+      const isRoundEnd = nextPlayer === state.firstGrabber
+
+      const newGrabDecisions = {
+        ...state.grabDecisions,
+        [action.position]: 'passed' as const
+      }
+
+      if (state.firstGrabber === null) {
+        const newPassCount = (state.grabPassCount || 0) + 1
+        if (newPassCount >= 3) {
+          // All players passed without anyone grabbing - restart dealing
+          const positions: PlayerPosition[] = ['player', 'ai1', 'ai2']
+          return {
+            ...state,
+            grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
+            grabPassCount: 0,
+            currentPlayer: positions[Math.floor(Math.random() * 3)],
+          }
+        }
+        return {
+          ...state,
+          grabDecisions: newGrabDecisions,
+          grabPassCount: newPassCount,
+          currentPlayer: nextPlayer,
+        }
+      }
+
+      if (isRoundEnd) {
+        if (state.lastGrabber !== null && state.lastGrabber !== state.firstGrabber) {
+          return { ...confirmLord(state, state.lastGrabber), grabDecisions: newGrabDecisions }
+        }
+        return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }
+      }
+
+      return {
+        ...state,
+        grabDecisions: newGrabDecisions,
+        currentPlayer: nextPlayer,
+      }
     }
 
     case 'RESET_GAME': {
@@ -181,6 +215,10 @@ function confirmLord(state: GameState, lordPos: PlayerPosition): GameState {
     players: updatedPlayers,
     lordPosition: lordPos,
     currentPlayer: lordPos,
+    firstGrabber: null,
+    lastGrabber: null,
+    grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
+    grabPassCount: 0,
   }
 }
 

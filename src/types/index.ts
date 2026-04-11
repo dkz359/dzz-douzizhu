@@ -69,8 +69,10 @@ export interface GameState {
   lastPlayedPlayer: PlayerPosition | null // 上家出牌玩家
   winner: PlayerPosition | null
   settings: GameSettings
-  lordCandidate: PlayerPosition | null  // 候选地主
-  grabRound: number                      // 当前抢地主轮次 (0-2)
+  firstGrabber: PlayerPosition | null  // 第一个抢的玩家
+  lastGrabber: PlayerPosition | null   // 上一个抢的玩家
+  grabDecisions: Record<PlayerPosition, 'none' | 'grabbed' | 'passed'>  // 抢地主决定
+  grabPassCount: number  // 连续过牌次数（用于判断无人抢地主时重新发牌）
 }
 
 // 游戏动作

@@ -63,7 +63,7 @@ export function GameTable() {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [state.phase, state.currentPlayer, state, grabLord, passGrab, playCards, pass])
+  }, [state.phase, state.currentPlayer, state.settings.difficulty, state.lastPlayedPlayer, state.lastPlayedCards, grabLord, playCards, pass])
 
   const handlePlayCards = useCallback((cards: typeof state.players[0]['hand']) => {
     playCards('player', cards)
@@ -104,10 +104,24 @@ export function GameTable() {
       </div>
 
       {/* AI 玩家 - 左上 */}
-      <AIPlayer player={ai1} isCurrentPlayer={state.currentPlayer === 'ai1'} isLord={ai1.isLord} position="left" />
+      <AIPlayer
+  player={ai1}
+  isCurrentPlayer={state.currentPlayer === 'ai1'}
+  isLord={ai1.isLord}
+  position="left"
+  grabStatus={state.grabDecisions.ai1}
+  gamePhase={state.phase}
+/>
 
       {/* AI 玩家 - 右上 */}
-      <AIPlayer player={ai2} isCurrentPlayer={state.currentPlayer === 'ai2'} isLord={ai2.isLord} position="right" />
+      <AIPlayer
+  player={ai2}
+  isCurrentPlayer={state.currentPlayer === 'ai2'}
+  isLord={ai2.isLord}
+  position="right"
+  grabStatus={state.grabDecisions.ai2}
+  gamePhase={state.phase}
+/>
 
       {/* 底牌区 */}
       <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

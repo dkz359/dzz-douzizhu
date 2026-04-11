@@ -48,7 +48,9 @@ export function LandLordPanel({ currentPlayer, onGrabLord, onPassGrab }: LandLor
         transition={{ duration: 1.5, repeat: Infinity }}
         className="bg-white/90 rounded-full px-6 py-3 shadow-lg"
       >
-        <span className="text-shiba-dark font-bold">等待其他人叫地主...</span>
+        <span className="text-shiba-dark font-bold">
+          等待{currentPlayer === 'ai1' ? '柴犬小明' : '柴犬小红'}叫地主...
+        </span>
       </motion.div>
     </div>
   )
