@@ -73,7 +73,7 @@ export function GameTable() {
     pass('player')
   }, [pass])
 
-  // Helper component to render played cards area
+  // Helper component to render played cards area with text
   const PlayedCardsArea = ({ cards, position }: { cards: Card[], position: string }) => (
     <motion.div
       initial={false}
@@ -85,6 +85,39 @@ export function GameTable() {
       ))}
     </motion.div>
   )
+
+  // Helper to render status text (for grabbing phase or pass)
+  const StatusText = ({ text, position }: { text: string, position: string }) => (
+    <motion.div
+      initial={false}
+      animate={{ scale: 1 }}
+      className="bg-black/30 rounded-xl px-4 py-2"
+    >
+      <span className="text-white text-lg font-bold">{text}</span>
+    </motion.div>
+  )
+
+  // Determine what to show in a player's played cards area
+  const getPlayerAreaDisplay = (pos: 'player' | 'ai1' | 'ai2'): { type: 'text'; text: string } | { type: 'cards'; cards: Card[] } | null => {
+    if (state.phase === 'grabbing_lord') {
+      const decision = state.grabDecisions[pos]
+      if (decision === 'grabbed') return { type: 'text', text: '抢地主' }
+      if (decision === 'passed') return { type: 'text', text: '不抢' }
+      return null
+    }
+    if (state.phase === 'playing') {
+      const playedCards = state.roundPlayedCards[pos]
+      if (playedCards && playedCards.length > 0) {
+        return { type: 'cards', cards: playedCards }
+      }
+      // If someone has played and this player hasn't, show "不出"
+      if (state.lastPlayedPlayer !== null && state.lastPlayedPlayer !== pos) {
+        return { type: 'text', text: '不出' }
+      }
+      return null
+    }
+    return null
+  }
 
   const player = state.players.find(p => p.position === 'player')!
   const ai1 = state.players.find(p => p.position === 'ai1')!
@@ -152,23 +185,32 @@ export function GameTable() {
 
       {/* AI1 出牌区 - 左侧 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2">
-        {state.roundPlayedCards?.ai1 && (
-          <PlayedCardsArea cards={state.roundPlayedCards.ai1} position="ai1" />
-        )}
+        {(() => {
+          const display = getPlayerAreaDisplay('ai1')
+          if (!display) return null
+          if (display.type === 'text') return <StatusText text={display.text} position="ai1" />
+          return <PlayedCardsArea cards={display.cards} position="ai1" />
+        })()}
       </div>
 
       {/* AI2 出牌区 - 右侧 */}
       <div className="absolute top-1/3 right-1/4 translate-x-1/2">
-        {state.roundPlayedCards?.ai2 && (
-          <PlayedCardsArea cards={state.roundPlayedCards.ai2} position="ai2" />
-        )}
+        {(() => {
+          const display = getPlayerAreaDisplay('ai2')
+          if (!display) return null
+          if (display.type === 'text') return <StatusText text={display.text} position="ai2" />
+          return <PlayedCardsArea cards={display.cards} position="ai2" />
+        })()}
       </div>
 
       {/* 玩家出牌区 - 中央下方 */}
       <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
-        {state.roundPlayedCards?.player && (
-          <PlayedCardsArea cards={state.roundPlayedCards.player} position="player" />
-        )}
+        {(() => {
+          const display = getPlayerAreaDisplay('player')
+          if (!display) return null
+          if (display.type === 'text') return <StatusText text={display.text} position="player" />
+          return <PlayedCardsArea cards={display.cards} position="player" />
+        })()}
       </div>
 
       {/* 玩家头像和信息 - 左下角 */}
