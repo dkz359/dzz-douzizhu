@@ -121,8 +121,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
+      // 清除当前玩家出的牌（选择不出）
+      const newRoundPlayedCards = { ...state.roundPlayedCards }
+      newRoundPlayedCards[state.currentPlayer] = null
+
       return {
         ...state,
+        roundPlayedCards: newRoundPlayedCards,
         currentPlayer: nextPlayer,
       }
     }

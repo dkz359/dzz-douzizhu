@@ -76,7 +76,7 @@ export function GameTable() {
   // Helper component to render played cards area
   const PlayedCardsArea = ({ cards, position }: { cards: Card[], position: string }) => (
     <motion.div
-      initial={{ scale: 0 }}
+      initial={false}
       animate={{ scale: 1 }}
       className="flex gap-1 bg-black/30 rounded-xl p-2"
     >
