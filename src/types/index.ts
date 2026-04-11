@@ -73,6 +73,8 @@ export interface GameState {
   lastGrabber: PlayerPosition | null   // 上一个抢的玩家
   grabDecisions: Record<PlayerPosition, 'none' | 'grabbed' | 'passed'>  // 抢地主决定
   grabPassCount: number  // 连续过牌次数（用于判断无人抢地主时重新发牌）
+  roundPlayedCards: Record<PlayerPosition, Card[] | null>  // 本轮各玩家出的牌
+  regrabAfterFirst: boolean  // 是否有人比firstGrabber后抢过
 }
 
 // 游戏动作

@@ -28,6 +28,8 @@ export function createInitialState(): GameState {
     lastGrabber: null,
     grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
     grabPassCount: 0,
+    roundPlayedCards: { player: null, ai1: null, ai2: null },
+    regrabAfterFirst: false,
   }
 }
 
@@ -66,6 +68,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         lastGrabber: null,
         grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
         grabPassCount: 0,
+        roundPlayedCards: { player: null, ai1: null, ai2: null },
+        regrabAfterFirst: false,
       }
     }
 
@@ -88,9 +92,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const updatedPlayers = [...state.players]
       updatedPlayers[playerIndex] = { ...player, hand: newHand }
 
+      const newRoundPlayedCards = { ...state.roundPlayedCards }
+      newRoundPlayedCards[position] = cards
+
       return {
         ...state,
         players: updatedPlayers,
+        roundPlayedCards: newRoundPlayedCards,
         lastPlayedCards: cardType,
         lastPlayedPlayer: position,
         currentPlayer: getNextPlayer(position, state.players.map(p => p.position)),
@@ -100,19 +108,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'PASS': {
-      // 检查是否所有人都过了
-      if (state.lastPlayedPlayer && state.currentPlayer === state.lastPlayedPlayer) {
-        // 如果回到出牌者，清空上家的牌
+      const nextPlayer = getNextPlayer(state.currentPlayer, state.players.map(p => p.position))
+
+      // 如果回到出牌者（一轮结束），清除本轮出牌记录
+      if (state.lastPlayedPlayer && nextPlayer === state.lastPlayedPlayer) {
         return {
           ...state,
+          roundPlayedCards: { player: null, ai1: null, ai2: null },
           lastPlayedCards: null,
           lastPlayedPlayer: null,
+          currentPlayer: nextPlayer,
         }
       }
 
       return {
         ...state,
-        currentPlayer: getNextPlayer(state.currentPlayer, state.players.map(p => p.position)),
+        currentPlayer: nextPlayer,
       }
     }
 
@@ -121,23 +132,36 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       const positions = state.players.map(p => p.position)
       const nextPlayer = getNextPlayer(state.currentPlayer, positions)
-      const isRoundEnd = nextPlayer === state.firstGrabber
-
       const newGrabDecisions = {
         ...state.grabDecisions,
         [action.position]: 'grabbed' as const
       }
 
-      if (isRoundEnd && state.firstGrabber !== null) {
-        return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+      // 如果回到 firstGrabber
+      if (nextPlayer === state.firstGrabber) {
+        // 如果是 firstGrabber 自己抢了且之前没人后抢
+        if (state.currentPlayer === state.firstGrabber && !state.regrabAfterFirst) {
+          // firstGrabber 首次抢后轮转回来，直接成为地主
+          return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+        }
+        // 如果有人后抢了，现在要最终确认
+        if (state.firstGrabber !== null && state.regrabAfterFirst) {
+          // firstGrabber 再次确认抢 → 成为地主
+          return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+        }
       }
+
+      // 正常抢地主流程
+      const isFirstGrab = state.firstGrabber === null
 
       return {
         ...state,
         grabDecisions: newGrabDecisions,
-        firstGrabber: state.firstGrabber === null ? state.currentPlayer : state.firstGrabber,
+        firstGrabber: isFirstGrab ? state.currentPlayer : state.firstGrabber,
         lastGrabber: state.currentPlayer,
         currentPlayer: nextPlayer,
+        // 如果 firstGrabber 已经抢过且现在又有人抢了，设置标记
+        regrabAfterFirst: !isFirstGrab ? true : state.regrabAfterFirst,
       }
     }
 
@@ -219,6 +243,8 @@ function confirmLord(state: GameState, lordPos: PlayerPosition): GameState {
     lastGrabber: null,
     grabDecisions: { player: 'none', ai1: 'none', ai2: 'none' },
     grabPassCount: 0,
+    roundPlayedCards: { player: null, ai1: null, ai2: null },
+    regrabAfterFirst: false,
   }
 }
 
