@@ -36,20 +36,22 @@ export function AIPlayer({ player, isCurrentPlayer, isLord, position, grabStatus
         🐕
       </div>
 
-      {/* 名字 */}
-      <div className="text-center relative">
+      {/* 名字和身份 */}
+      <div className="text-center">
         <div className="text-white font-bold text-sm drop-shadow-lg">
           {player.name}
         </div>
-        {isLord ? (
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-lg">
-            地主
-          </div>
-        ) : gamePhase === 'playing' ? (
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
-            农民
-          </div>
-        ) : null}
+        <div className="flex flex-col items-center gap-0.5 mt-1">
+          {isLord ? (
+            <div className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
+              地主
+            </div>
+          ) : gamePhase === 'playing' ? (
+            <div className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+              农民
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* 手牌数量 */}
