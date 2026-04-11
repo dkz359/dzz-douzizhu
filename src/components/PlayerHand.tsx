@@ -5,9 +5,9 @@ import { Card } from './Card'
 import { sortByRank } from '../engine/utils'
 
 interface PlayerHandProps {
-  cards: Card[]
+  cards: CardType[]
   isCurrentPlayer: boolean
-  onPlayCards: (cards: Card[]) => void
+  onPlayCards: (cards: CardType[]) => void
   lastPlayedCards: CardType | null
   isFirstPlay: boolean
 }
