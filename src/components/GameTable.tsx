@@ -110,8 +110,10 @@ export function GameTable() {
       if (playedCards && playedCards.length > 0) {
         return { type: 'cards', cards: playedCards }
       }
-      // Only show "不出" if someone else has actually played (not just at round start)
-      if (state.lastPlayedPlayer !== null && state.lastPlayedPlayer !== pos && state.lastPlayedCards !== null) {
+      // Only show "不出" if:
+      // 1. It's this player's turn (currentPlayer === pos)
+      // 2. Someone else has already played cards this round (lastPlayedCards !== null)
+      if (state.currentPlayer === pos && state.lastPlayedCards !== null) {
         return { type: 'text', text: '不出' }
       }
       return null
