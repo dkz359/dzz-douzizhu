@@ -123,7 +123,8 @@ export function GameTable() {
   gamePhase={state.phase}
 />
 
-      {/* 底牌区 */}
+      {/* 底牌区 - 仅在发牌阶段显示 */}
+      {state.phase === 'dealing' && (
       <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="flex gap-2">
           {state.bottomCards.map((card, i) => (
@@ -147,24 +148,25 @@ export function GameTable() {
           </motion.div>
         )}
       </div>
+      )}
 
       {/* AI1 出牌区 - 左侧 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2">
-        {state.lastPlayedCards && (
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai1' && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai1" />
         )}
       </div>
 
       {/* AI2 出牌区 - 右侧 */}
       <div className="absolute top-1/3 right-1/4 translate-x-1/2">
-        {state.lastPlayedCards && (
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'ai2' && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="ai2" />
         )}
       </div>
 
       {/* 玩家出牌区 - 中央下方 */}
       <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
-        {state.lastPlayedCards && (
+        {state.lastPlayedCards && state.lastPlayedPlayer === 'player' && (
           <PlayedCardsArea cards={state.lastPlayedCards.cards} position="player" />
         )}
       </div>
@@ -178,19 +180,21 @@ export function GameTable() {
         `}>
           🧑
         </div>
-        <div className="text-center relative">
+        <div className="text-center">
           <div className="text-white font-bold text-sm drop-shadow-lg">
             {player.name}
           </div>
-          {player.isLord ? (
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-lg">
-              地主
-            </div>
-          ) : state.phase === 'playing' ? (
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
-              农民
-            </div>
-          ) : null}
+          <div className="flex flex-col items-center gap-0.5 mt-1">
+            {player.isLord ? (
+              <div className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
+                地主
+              </div>
+            ) : state.phase === 'playing' ? (
+              <div className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                农民
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
