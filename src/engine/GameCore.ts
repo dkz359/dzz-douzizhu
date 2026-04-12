@@ -30,6 +30,7 @@ export function createInitialState(): GameState {
     grabPassCount: 0,
     roundPlayedCards: { player: null, ai1: null, ai2: null },
     regrabAfterFirst: false,
+    needsSecondDecision: false,
   }
 }
 

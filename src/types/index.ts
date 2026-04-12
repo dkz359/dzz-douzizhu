@@ -75,6 +75,7 @@ export interface GameState {
   grabPassCount: number  // 连续过牌次数（用于判断无人抢地主时重新发牌）
   roundPlayedCards: Record<PlayerPosition, Card[] | null>  // 本轮各玩家出的牌
   regrabAfterFirst: boolean  // 是否有人比firstGrabber后抢过
+  needsSecondDecision: boolean  // 是否需要二次决策
 }
 
 // 游戏动作
