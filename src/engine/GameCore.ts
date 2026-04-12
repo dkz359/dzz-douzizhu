@@ -224,7 +224,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           return {
             ...state,
             grabDecisions: newGrabDecisions,
-            currentPlayer: state.firstGrabber, // 回到 firstGrabber 让他做第二次决定
+            currentPlayer: state.firstGrabber,
+            needsSecondDecision: true,
           }
         }
         // 否则（B、C 都过），firstGrabber 自动成为地主
