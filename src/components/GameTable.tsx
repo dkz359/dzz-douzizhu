@@ -259,7 +259,6 @@ export function GameTable() {
           <LandLordPanel
             currentPlayer={state.currentPlayer}
             grabDecision={state.grabDecisions.player}
-            needsSecondDecision={state.needsSecondDecision}
             onGrabLord={grabLord}
             onPassGrab={passGrab}
           />

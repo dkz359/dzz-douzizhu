@@ -30,7 +30,6 @@ export function createInitialState(): GameState {
     grabPassCount: 0,
     roundPlayedCards: { player: null, ai1: null, ai2: null },
     regrabAfterFirst: false,
-    needsSecondDecision: false,
   }
 }
 
@@ -152,12 +151,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         [action.position]: 'grabbed' as const
       }
 
-      // 只有在二次决策时，才在 GRAB_LORD 时直接确认地主
-      // 二次决策条件：needsSecondDecision=true 且 firstGrabber 再次轮到
-      if (state.currentPlayer === state.firstGrabber && state.needsSecondDecision) {
-        return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
-      }
-
       // 如果回到 firstGrabber（第一轮的情况）
       if (nextPlayer === state.firstGrabber) {
         // 如果是 firstGrabber 自己抢了（首次）→ 确认他为地主
@@ -222,12 +215,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (isRoundEnd) {
         // 如果 B 或 C 在第一轮抢过，firstGrabber 获得第二次机会
         if (state.regrabAfterFirst) {
-          return {
-            ...state,
-            grabDecisions: newGrabDecisions,
-            currentPlayer: state.firstGrabber,
-            needsSecondDecision: true,
-          }
+          // firstGrabber 的第二轮决策：grab 直接确认，pass 也直接确认（没有其他人能抢了）
+          return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }
         }
         // 否则（B、C 都过），firstGrabber 自动成为地主
         return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }
