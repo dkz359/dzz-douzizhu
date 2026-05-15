@@ -1,7 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="45" fill="#F5A623"/>
-  <ellipse cx="35" cy="40" rx="8" ry="10" fill="#4A3728"/>
-  <ellipse cx="65" cy="40" rx="8" ry="10" fill="#4A3728"/>
-  <ellipse cx="50" cy="55" rx="12" ry="8" fill="#4A3728"/>
-  <circle cx="50" cy="52" r="6" fill="#4A3728"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cute shiba icon">
+  <defs>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffc878"/>
+      <stop offset="100%" stop-color="#f3a64b"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="64" cy="66" r="46" fill="url(#fur)"/>
+
+  <path d="M29 46 L39 20 L55 42 Z" fill="#f3a64b"/>
+  <path d="M99 46 L89 20 L73 42 Z" fill="#f3a64b"/>
+  <path d="M35 43 L40 27 L50 40 Z" fill="#ffe9c9"/>
+  <path d="M93 43 L88 27 L78 40 Z" fill="#ffe9c9"/>
+
+  <ellipse cx="64" cy="72" rx="30" ry="25" fill="#fff1db"/>
+
+  <circle cx="49" cy="60" r="4.5" fill="#2f241d"/>
+  <circle cx="79" cy="60" r="4.5" fill="#2f241d"/>
+  <circle cx="47.8" cy="58.8" r="1.2" fill="#fff"/>
+  <circle cx="77.8" cy="58.8" r="1.2" fill="#fff"/>
+
+  <ellipse cx="64" cy="70" rx="7" ry="5.5" fill="#2f241d"/>
+  <path d="M64 74 C60 79, 53 80, 49 76" fill="none" stroke="#2f241d" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 74 C68 79, 75 80, 79 76" fill="none" stroke="#2f241d" stroke-width="3" stroke-linecap="round"/>
+
+  <ellipse cx="41" cy="72" rx="6" ry="4" fill="#ffb3b3" opacity="0.65"/>
+  <ellipse cx="87" cy="72" rx="6" ry="4" fill="#ffb3b3" opacity="0.65"/>
 </svg>
