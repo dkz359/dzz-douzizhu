@@ -9,10 +9,11 @@ import { ActionPanel } from './ActionPanel'
 import { ResultModal } from './ResultModal'
 import { Card as CardComponent, CardBack } from './Card'
 import { Card } from '../types'
-import { canPlayCards } from '../engine/GameCore'
+import { useAudio } from '../context/AudioContext'
 
 export function GameTable() {
-  const { state, startGame, grabLord, passGrab, playCards, pass, resetGame, dispatch } = useGame()
+  const { state, grabLord, passGrab, playCards, pass, resetGame, dispatch } = useGame()
+  const { isMusicOn, toggleMusic } = useAudio()
 
   // Game phase transitions and AI logic
   useEffect(() => {
@@ -128,8 +129,21 @@ export function GameTable() {
 
   const isLordWin = state.winner === state.lordPosition
 
+  const phaseText = state.phase === 'dealing' ? '发牌中' : state.phase === 'grabbing_lord' ? '抢地主' : state.phase === 'playing' ? '出牌中' : '游戏结束'
+
   return (
-    <div className="relative w-full h-screen bg-gradient-to-b from-green-700 to-green-900 overflow-hidden">
+    <div className="relative w-full h-screen bg-gradient-to-b from-emerald-900 via-emerald-800 to-teal-950 overflow-hidden">
+
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 rounded-full bg-black/35 text-white px-5 py-2 text-sm backdrop-blur-md border border-white/15">
+        {phaseText} · 当前行动：{state.currentPlayer === 'player' ? '你' : state.currentPlayer.toUpperCase()}
+      </div>
+      <button
+        onClick={toggleMusic}
+        className="absolute top-4 right-4 z-20 rounded-full bg-black/35 text-white px-4 py-2 text-sm backdrop-blur-md border border-white/15 hover:bg-black/45"
+      >
+        {isMusicOn ? '🔊 音乐开' : '🔇 音乐关'}
+      </button>
+
       {/* 装饰 */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 text-8xl">🌿</div>
