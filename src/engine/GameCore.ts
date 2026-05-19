@@ -151,12 +151,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         [action.position]: 'grabbed' as const
       }
 
+      if (state.currentPlayer === state.firstGrabber && state.regrabAfterFirst) {
+        return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
+      }
+
       // 如果回到 firstGrabber（第一轮的情况）
       if (nextPlayer === state.firstGrabber) {
-        // 如果是 firstGrabber 自己抢了（首次）→ 确认他为地主
-        if (state.currentPlayer === state.firstGrabber) {
-          return { ...confirmLord(state, state.currentPlayer), grabDecisions: newGrabDecisions }
-        }
         // 如果是其他人抢后轮到 firstGrabber → 只更新状态，不确认，等 firstGrabber 决策
         return {
           ...state,
@@ -192,6 +192,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         [action.position]: 'passed' as const
       }
 
+      if (state.currentPlayer === state.firstGrabber && state.regrabAfterFirst) {
+        return { ...confirmLord(state, state.lastGrabber ?? state.firstGrabber), grabDecisions: newGrabDecisions }
+      }
+
       if (state.firstGrabber === null) {
         const newPassCount = (state.grabPassCount || 0) + 1
         if (newPassCount >= 3) {
@@ -215,8 +219,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (isRoundEnd) {
         // 如果 B 或 C 在第一轮抢过，firstGrabber 获得第二次机会
         if (state.regrabAfterFirst) {
-          // firstGrabber 的第二轮决策：grab 直接确认，pass 也直接确认（没有其他人能抢了）
-          return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }
+          return {
+            ...state,
+            grabDecisions: newGrabDecisions,
+            currentPlayer: nextPlayer,
+          }
         }
         // 否则（B、C 都过），firstGrabber 自动成为地主
         return { ...confirmLord(state, state.firstGrabber), grabDecisions: newGrabDecisions }

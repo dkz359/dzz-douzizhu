@@ -5,24 +5,25 @@ import { PlayerPosition } from '../types'
 interface LandLordPanelProps {
   currentPlayer: PlayerPosition
   grabDecision: 'none' | 'grabbed' | 'passed'
+  needsSecondDecision?: boolean
   onGrabLord: (position: PlayerPosition) => void
   onPassGrab: (position: PlayerPosition) => void
 }
 
-export function LandLordPanel({ currentPlayer, grabDecision, onGrabLord, onPassGrab }: LandLordPanelProps) {
-  // 如果玩家已经决定过，自动继续（不抢则pass，不显示面板）
+export function LandLordPanel({ currentPlayer, grabDecision, needsSecondDecision = false, onGrabLord, onPassGrab }: LandLordPanelProps) {
+  // 非二次决策时，玩家已有决定就自动跳过当前回合。
   useEffect(() => {
-    if (currentPlayer === 'player' && grabDecision !== 'none') {
+    if (currentPlayer === 'player' && grabDecision !== 'none' && !needsSecondDecision) {
       if (grabDecision === 'grabbed') {
         onGrabLord('player')
       } else {
         onPassGrab('player')
       }
     }
-  }, [currentPlayer, grabDecision, onGrabLord, onPassGrab])
+  }, [currentPlayer, grabDecision, needsSecondDecision, onGrabLord, onPassGrab])
 
-  // 如果玩家已经决定过（抢或过），不显示操作面板
-  if (grabDecision !== 'none') {
+  // 二次决策时，即使之前抢过，也要重新显示操作面板。
+  if (grabDecision !== 'none' && !needsSecondDecision) {
     return null
   }
 

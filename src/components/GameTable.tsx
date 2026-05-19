@@ -130,6 +130,11 @@ export function GameTable() {
   const isLordWin = state.winner === state.lordPosition
 
   const phaseText = state.phase === 'dealing' ? '发牌中' : state.phase === 'grabbing_lord' ? '抢地主' : state.phase === 'playing' ? '出牌中' : '游戏结束'
+  const needsPlayerSecondDecision =
+    state.phase === 'grabbing_lord' &&
+    state.currentPlayer === 'player' &&
+    state.firstGrabber === 'player' &&
+    state.regrabAfterFirst
 
   return (
     <div className="relative w-full h-screen bg-gradient-to-b from-emerald-900 via-emerald-800 to-teal-950 overflow-hidden">
@@ -273,6 +278,7 @@ export function GameTable() {
           <LandLordPanel
             currentPlayer={state.currentPlayer}
             grabDecision={state.grabDecisions.player}
+            needsSecondDecision={needsPlayerSecondDecision}
             onGrabLord={grabLord}
             onPassGrab={passGrab}
           />
