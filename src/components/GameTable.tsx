@@ -57,7 +57,7 @@ export function GameTable() {
 
         if (result === 'pass') {
           pass(currentPlayer)
-        } else if (Array.isArray(result) && result.length > 0) {
+        } else if (result.length > 0) {
           playCards(currentPlayer, result)
         }
       }

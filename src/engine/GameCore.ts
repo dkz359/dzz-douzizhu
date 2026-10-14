@@ -1,6 +1,6 @@
 import { Card, CardType, GameState, GameAction, Player, PlayerPosition } from '../types'
 import { createDeck, shuffleDeck } from './utils'
-import { identifyCardType, compareCardTypes } from './CardTypes'
+import { identifyCardType } from './CardTypes'
 
 // 初始玩家状态
 function createInitialPlayers(): Player[] {
@@ -17,7 +17,6 @@ export function createInitialState(): GameState {
     phase: 'idle',
     players: createInitialPlayers(),
     lordPosition: null,
-    deck: [],
     bottomCards: [],
     currentPlayer: 'player',
     lastPlayedCards: null,
@@ -57,7 +56,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           { ...state.players[1], hand: ai1Cards, isLord: false },
           { ...state.players[2], hand: ai2Cards, isLord: false },
         ],
-        deck: [],
         bottomCards,
         lordPosition: null,
         currentPlayer: randomStart,
@@ -315,19 +313,4 @@ export function canPlayCards(
   if (cardType.cards.length !== lastCards.cards.length) return false
 
   return cardType.rank > lastCards.rank
-}
-
-// 判断胜负
-export function determineWinner(state: GameState): PlayerPosition | null {
-  const lord = state.players.find(p => p.position === state.lordPosition)
-  const farmers = state.players.filter(p => p.position !== state.lordPosition)
-
-  // 地主赢了
-  if (lord && lord.hand.length === 0) return state.lordPosition
-  // 农民赢了（任意一个农民出完）
-  if (farmers.some(f => f.hand.length === 0)) {
-    return farmers.find(f => f.hand.length === 0)!.position
-  }
-
-  return null
 }

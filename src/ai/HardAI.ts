@@ -1,12 +1,11 @@
 import { Card, CardType, AIDifficulty } from '../types'
 import { IAIStrategy } from './types'
-import { identifyCardType } from '../engine/CardTypes'
 import { groupByRank } from '../engine/utils'
+import { findAllPlays, findBeating } from './cardFinder'
+import { getBombRanks, selectBest, selectBestBomb, shouldBomb } from './playHeuristics'
 
 export class HardAI implements IAIStrategy {
   difficulty: AIDifficulty = 'hard'
-
-  private _rememberdCards: Card[] = [] // 记牌器
 
   decideGrabLord(hand: Card[]): boolean {
     // 高端AI：评估手牌质量
@@ -38,95 +37,26 @@ export class HardAI implements IAIStrategy {
     hand: Card[],
     lastCards: CardType | null,
     isFirstPlay: boolean
-  ): Card[] {
+  ): Card[] | 'pass' {
     if (hand.length === 0) return []
 
-    // 困难AI：更智能的出牌
-    // 1. 记牌
-    this.updateMemory(hand)
+    const plays = findAllPlays(hand)
+    const bombRanks = getBombRanks(hand)
 
-    // 2. 分析剩余大牌
-    // 3. 配合农民
-    // 4. 读牌
-
-    const combinations = this.findSmartPlays(hand, lastCards, isFirstPlay)
-
-    if (combinations.length === 0) {
-      return 'pass' as unknown as Card[]
+    // 普通牌型优先
+    const normal = plays.filter(p => p.type !== 'bomb' && p.type !== 'rocket')
+    const beatingNormal = findBeating(normal, lastCards, isFirstPlay)
+    if (beatingNormal.length > 0) {
+      return selectBest(beatingNormal, bombRanks).cards
     }
 
-    return this.selectSmartPlay(combinations, hand, lastCards)
-  }
-
-  private updateMemory(_playedCards: Card[]): void {
-    // 简化版记牌
-  }
-
-  private findSmartPlays(
-    hand: Card[],
-    lastCards: CardType | null,
-    isFirstPlay: boolean
-  ): Card[][] {
-    // 找所有能出的牌
-    const results: Card[][] = []
-
-    // 单张
-    for (const card of hand) {
-      if (this.canBeatCard(card, lastCards, isFirstPlay)) {
-        results.push([card])
-      }
+    // 普通牌压不过，考虑炸弹
+    const bombs = plays.filter(p => p.type === 'bomb' || p.type === 'rocket')
+    const beatingBombs = findBeating(bombs, lastCards, isFirstPlay)
+    if (beatingBombs.length > 0 && shouldBomb(hand, lastCards, beatingBombs)) {
+      return selectBestBomb(beatingBombs).cards
     }
 
-    // 对子
-    const groups = groupByRank(hand)
-    for (const [rank, cards] of groups) {
-      if (cards.length >= 2) {
-        if (this.canBeatPair(rank, lastCards, isFirstPlay)) {
-          results.push(cards.slice(0, 2))
-        }
-      }
-    }
-
-    // 三张
-    for (const [rank, cards] of groups) {
-      if (cards.length >= 3) {
-        if (this.canBeatTriple(rank, lastCards, isFirstPlay)) {
-          results.push(cards.slice(0, 3))
-        }
-      }
-    }
-
-    return results
-  }
-
-  private canBeatCard(card: Card, lastCards: CardType | null, isFirstPlay: boolean): boolean {
-    if (isFirstPlay || lastCards === null) return true
-    if (lastCards.type === 'rocket') return false
-    if (lastCards.type === 'bomb') return card.rank > lastCards.rank
-    if (lastCards.type !== 'single') return false
-    return card.rank > lastCards.rank
-  }
-
-  private canBeatPair(rank: number, lastCards: CardType | null, isFirstPlay: boolean): boolean {
-    if (isFirstPlay || lastCards === null) return true
-    if (lastCards.type !== 'pair') return false
-    return rank > lastCards.rank
-  }
-
-  private canBeatTriple(rank: number, lastCards: CardType | null, isFirstPlay: boolean): boolean {
-    if (isFirstPlay || lastCards === null) return true
-    if (lastCards.type !== 'triple') return false
-    return rank > lastCards.rank
-  }
-
-  private selectSmartPlay(
-    combinations: Card[][],
-    _hand: Card[],
-    _lastCards: CardType | null
-  ): Card[] {
-    // 优先出能回收的单张
-    // 避免送地主
-    // 选择对团队最有利的出牌
-    return combinations[0]
+    return 'pass'
   }
 }

@@ -1,4 +1,4 @@
-import { Card, Suit, PlayerPosition } from '../types'
+import { Card, Suit } from '../types'
 
 // 创建一副牌
 export function createDeck(): Card[] {
@@ -29,15 +29,6 @@ export function shuffleDeck(deck: Card[]): Card[] {
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
-}
-
-// 发牌给玩家
-export function dealCards(deck: Card[], playerCount: number): Card[][] {
-  const hands: Card[][] = Array.from({ length: playerCount }, () => [])
-  deck.forEach((card, index) => {
-    hands[index % playerCount].push(card)
-  })
-  return hands
 }
 
 // 获取牌的点数名称

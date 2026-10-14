@@ -7,5 +7,5 @@ export interface IAIStrategy {
     hand: Card[],
     lastCards: CardType | null,
     isFirstPlay: boolean
-  ): Card[]
+  ): Card[] | 'pass'
 }

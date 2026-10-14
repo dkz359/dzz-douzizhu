@@ -62,7 +62,6 @@ export interface GameState {
   phase: GamePhase
   players: Player[]
   lordPosition: PlayerPosition | null
-  deck: Card[] // 剩余牌堆
   bottomCards: Card[] // 底牌（3张）
   currentPlayer: PlayerPosition // 当前出牌玩家
   lastPlayedCards: CardType | null // 上家出的牌

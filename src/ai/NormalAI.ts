@@ -1,7 +1,8 @@
 import { Card, CardType, AIDifficulty } from '../types'
 import { IAIStrategy } from './types'
-import { identifyCardType } from '../engine/CardTypes'
 import { groupByRank } from '../engine/utils'
+import { findAllPlays, findBeating } from './cardFinder'
+import { getBombRanks, selectBest, selectBestBomb, shouldBomb } from './playHeuristics'
 
 export class NormalAI implements IAIStrategy {
   difficulty: AIDifficulty = 'normal'
@@ -28,64 +29,26 @@ export class NormalAI implements IAIStrategy {
     hand: Card[],
     lastCards: CardType | null,
     isFirstPlay: boolean
-  ): Card[] {
+  ): Card[] | 'pass' {
     if (hand.length === 0) return []
 
-    // 找出所有能出的牌型组合
-    const playableCombinations = this.findPlayableCombinations(hand, lastCards, isFirstPlay)
+    const plays = findAllPlays(hand)
+    const bombRanks = getBombRanks(hand)
 
-    if (playableCombinations.length === 0) {
-      return 'pass' as unknown as Card[]
+    // 普通牌型优先
+    const normal = plays.filter(p => p.type !== 'bomb' && p.type !== 'rocket')
+    const beatingNormal = findBeating(normal, lastCards, isFirstPlay)
+    if (beatingNormal.length > 0) {
+      return selectBest(beatingNormal, bombRanks).cards
     }
 
-    // 选择最优的出牌策略
-    return this.selectBestPlay(playableCombinations, hand)
-  }
-
-  private findPlayableCombinations(
-    hand: Card[],
-    lastCards: CardType | null,
-    isFirstPlay: boolean
-  ): Card[][] {
-    const results: Card[][] = []
-
-    // 尝试单张
-    for (const card of hand) {
-      if (this.canBeat(card, lastCards, isFirstPlay)) {
-        results.push([card])
-      }
+    // 普通牌压不过，考虑炸弹
+    const bombs = plays.filter(p => p.type === 'bomb' || p.type === 'rocket')
+    const beatingBombs = findBeating(bombs, lastCards, isFirstPlay)
+    if (beatingBombs.length > 0 && shouldBomb(hand, lastCards, beatingBombs)) {
+      return selectBestBomb(beatingBombs).cards
     }
 
-    // 尝试对子
-    const groups = groupByRank(hand)
-    for (const [rank, cards] of groups) {
-      if (cards.length >= 2) {
-        const pair = cards.slice(0, 2)
-        if (this.canBeatPair(rank, lastCards, isFirstPlay)) {
-          results.push(pair)
-        }
-      }
-    }
-
-    return results
-  }
-
-  private canBeat(card: Card, lastCards: CardType | null, isFirstPlay: boolean): boolean {
-    if (isFirstPlay || lastCards === null) return true
-    if (lastCards.type === 'rocket') return false
-    if (lastCards.type !== 'single') return false
-    return card.rank > lastCards.rank
-  }
-
-  private canBeatPair(rank: number, lastCards: CardType | null, isFirstPlay: boolean): boolean {
-    if (isFirstPlay || lastCards === null) return true
-    if (lastCards.type !== 'pair') return false
-    return rank > lastCards.rank
-  }
-
-  private selectBestPlay(combinations: Card[][], _hand: Card[]): Card[] {
-    // 选择能最快出完的组合
-    // 优先出短顺子、回收单张
-    return combinations[0]
+    return 'pass'
   }
 }
