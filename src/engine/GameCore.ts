@@ -79,12 +79,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'PLAY_CARDS': {
       const { position, cards } = action
+
+      // 校验：必须轮到当前玩家出牌
+      if (position !== state.currentPlayer) return state
+
       const playerIndex = state.players.findIndex(p => p.position === position)
+      if (playerIndex === -1) return state
       const player = state.players[playerIndex]
+
+      // 校验：出的牌必须都在手牌中
+      const handIds = new Set(player.hand.map(c => c.id))
+      if (cards.length === 0 || !cards.every(c => handIds.has(c.id))) return state
+
+      // 校验：牌型必须合法
+      const cardType = identifyCardType(cards)
+      if (!cardType) return state
+
+      // 校验：能否压过上家（首出可出任意合法牌型）
+      const isFirstPlay = state.lastPlayedPlayer === null
+      if (!canPlayCards(cards, state.lastPlayedCards, isFirstPlay)) return state
 
       // 找出出的牌
       const newHand = player.hand.filter(c => !cards.some(pc => pc.id === c.id))
-      const cardType = identifyCardType(cards)!
 
       // 检查是否出完了
       const isWin = newHand.length === 0

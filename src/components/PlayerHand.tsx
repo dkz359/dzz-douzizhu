@@ -1,14 +1,17 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Card as CardType } from '../types'
+import { Card as CardType, CardType as CardTypeInfo } from '../types'
 import { Card } from './Card'
 import { sortByRank } from '../engine/utils'
+import { identifyCardType } from '../engine/CardTypes'
+import { canPlayCards } from '../engine/GameCore'
 
 interface PlayerHandProps {
   cards: CardType[]
   isCurrentPlayer: boolean
   onPlayCards: (cards: CardType[]) => void
   isFirstPlay: boolean
+  lastPlayedCards: CardTypeInfo | null
   canPass?: boolean
   onPass?: () => void
 }
@@ -18,15 +21,18 @@ export function PlayerHand({
   isCurrentPlayer,
   onPlayCards,
   isFirstPlay,
+  lastPlayedCards,
   canPass,
   onPass
 }: PlayerHandProps) {
   const [selectedCards, setSelectedCards] = useState<CardType[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   // 排序手牌
   const sortedCards = useMemo(() => sortByRank(cards), [cards])
 
   const handleCardClick = (card: CardType) => {
+    setError(null)
     setSelectedCards(prev => {
       const isSelected = prev.some(c => c.id === card.id)
       if (isSelected) {
@@ -38,10 +44,21 @@ export function PlayerHand({
   }
 
   const handlePlay = () => {
-    if (selectedCards.length > 0) {
-      onPlayCards(selectedCards)
-      setSelectedCards([])
+    if (selectedCards.length === 0) return
+
+    if (!identifyCardType(selectedCards)) {
+      setError('无效的牌型组合')
+      return
     }
+
+    if (!canPlayCards(selectedCards, lastPlayedCards, isFirstPlay)) {
+      setError('管不上，请选择更大的牌')
+      return
+    }
+
+    setError(null)
+    onPlayCards(selectedCards)
+    setSelectedCards([])
   }
 
   const isSelected = (card: CardType) => selectedCards.some(c => c.id === card.id)
@@ -53,24 +70,31 @@ export function PlayerHand({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 flex gap-4 justify-center"
+          className="mb-4 flex flex-col items-center gap-2"
         >
-          {canPass && (
-            <button
-              onClick={onPass}
-              className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full shadow-lg"
-            >
-              不出
-            </button>
+          {error && (
+            <div className="px-4 py-1.5 bg-red-500/90 text-white text-sm font-bold rounded-full shadow-lg">
+              {error}
+            </div>
           )}
-          {selectedCards.length > 0 && (
-            <button
-              onClick={handlePlay}
-              className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
-            >
-              出牌 ({selectedCards.length}张)
-            </button>
-          )}
+          <div className="flex gap-4 justify-center">
+            {canPass && (
+              <button
+                onClick={onPass}
+                className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full shadow-lg"
+              >
+                不出
+              </button>
+            )}
+            {selectedCards.length > 0 && (
+              <button
+                onClick={handlePlay}
+                className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-shiba-dark font-bold rounded-full shadow-lg"
+              >
+                出牌 ({selectedCards.length}张)
+              </button>
+            )}
+          </div>
         </motion.div>
       )}
 

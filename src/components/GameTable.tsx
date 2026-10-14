@@ -267,6 +267,7 @@ export function GameTable() {
           isCurrentPlayer={state.currentPlayer === 'player'}
           onPlayCards={handlePlayCards}
           isFirstPlay={state.lastPlayedPlayer === null}
+          lastPlayedCards={state.lastPlayedCards}
           canPass={playerCanPass}
           onPass={handlePass}
         />
